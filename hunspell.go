@@ -7,7 +7,7 @@ package hunspell
 
 // #cgo pkg-config: hunspell
 // #include <stdlib.h>
-// #include <hunspell/hunspell.h>
+// #include <hunspell.h>
 import "C"
 
 import (
