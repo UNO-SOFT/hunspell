@@ -122,22 +122,6 @@ func (s *Spell) Remove(word string) (ok bool) {
 	return C.Hunspell_remove(s.handle, w) == 0
 }
 
-// AddDict adds extra dictionary (.dic file) to the run-time dictionary.
-func (s *Spell) AddDict(path string) error {
-	_, err := os.Stat(path)
-	if err != nil {
-		pe := err.(*os.PathError)
-		pe.Op = "open"
-		return err
-	}
-	p := C.CString(path)
-	defer C.free(unsafe.Pointer(p))
-	if C.Hunspell_add_dic(s.handle, p) == 1 {
-		return errors.New("failed to add dictionary")
-	}
-	return nil
-}
-
 // Analyze returns a morphological analysis of the word.
 func (s *Spell) Analyze(word string) []string {
 	w := C.CString(word)
