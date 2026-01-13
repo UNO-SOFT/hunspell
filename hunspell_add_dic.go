@@ -14,14 +14,11 @@ import "C"
 import (
 	"errors"
 	"os"
-	"path/filepath"
-	"runtime"
 	"unsafe"
 )
 
 // AddDict adds extra dictionary (.dic file) to the run-time dictionary.
 func (s *Spell) AddDict(path string) error {
-	return ErrNotImplemented
 	_, err := os.Stat(path)
 	if err != nil {
 		pe := err.(*os.PathError)
