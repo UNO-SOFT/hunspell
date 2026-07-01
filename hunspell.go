@@ -73,9 +73,13 @@ func NewSpellPaths(affix, dict string) (*Spell, error) {
 	affC := C.CString(affix)
 	dictC := C.CString(dict)
 	s := &Spell{handle: C.Hunspell_create(affC, dictC)}
-	runtime.SetFinalizer(s, func(h *Spell) {
-		C.Hunspell_destroy(h.handle)
-	})
+	runtime.AddCleanup(
+		s,
+		func(handle *C.Hunhandle) {
+			C.Hunspell_destroy(handle)
+		},
+		s.handle,
+	)
 	C.free(unsafe.Pointer(affC))
 	C.free(unsafe.Pointer(dictC))
 	return s, nil
