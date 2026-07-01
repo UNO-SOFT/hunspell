@@ -7,18 +7,12 @@ package hunspell
 import (
 	"bufio"
 	"bytes"
+	"fmt"
 	"os/exec"
+	"path/filepath"
 	"reflect"
 	"strings"
 	"testing"
-)
-
-const (
-	// Language used for testing.
-	lang = "en_US"
-
-	// Path to dictionaries.
-	path = "/usr/share/hunspell"
 )
 
 var (
@@ -67,13 +61,46 @@ var (
 			"definitely", "effeminately", "definitively", "indefinably",
 		},
 		"langauge": {
-			"language", "Augean", "Angela",
+			"language", "melange",
 		},
 		"seperate": {
 			"separate", "desperate", "temperate", "exasperate", "serrate",
 		},
 	}
 )
+var (
+	// Language used for testing.
+	lang = "en_US"
+
+	// Path to dictionaries.
+	path = "/usr/share/hunspell"
+)
+
+func init() {
+	b, _ := exec.Command("hunspell", "-D").CombinedOutput()
+	m := make(map[string][]string)
+	state := 0
+Loop:
+	for line := range bytes.SplitSeq(b, []byte{'\n'}) {
+		switch state {
+		case 0:
+			if bytes.HasPrefix(line, []byte("AVAILABLE")) {
+				state = 1
+			}
+		case 1:
+			if bytes.HasPrefix(line, []byte("LOADED")) {
+				break Loop
+			}
+			d, b := filepath.Split(string(line))
+			m[d] = append(m[d], b)
+			if b == lang {
+				path = d
+				break Loop
+			}
+		}
+	}
+	fmt.Println("found dicts:", m)
+}
 
 func TestHunspell(t *testing.T) {
 	if _, err := exec.LookPath("hunspell"); err != nil {
